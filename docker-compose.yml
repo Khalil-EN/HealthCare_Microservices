@@ -1,0 +1,95 @@
+services:
+  mongo:
+      image: mongo:latest
+      container_name: mongo
+      ports:
+        - "27017:27017"
+      environment:
+        MONGO_INITDB_ROOT_USERNAME: root
+        MONGO_INITDB_ROOT_PASSWORD: example
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.3
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: confluentinc/cp-kafka:7.4.3
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    ports:
+      - "9092:9092"
+
+  consul:
+    image: consul:1.15
+    ports:
+      - "8500:8500"
+      - "8600:8600/udp"
+
+  appointmentservice:
+    build: ./appointmentservice
+    ports:
+      - "4001:4001"
+    depends_on:
+      - consul
+      - kafka
+      - mongo
+    environment:
+      - SERVICE_NAME=appointmentservice
+      - CONSUL_HOST=consul
+      - MONGO_URL=mongodb://root:example@mongo:27017/appointmentDB?authSource=admin
+
+  doctorservice:
+    build: ./doctorservice
+    ports:
+      - "4000:4000"
+    depends_on:
+      - consul
+      - kafka
+      - mongo
+    environment:
+      - SERVICE_NAME=doctorservice
+      - CONSUL_HOST=consul
+      - MONGO_URL=mongodb://root:example@mongo:27017/doctorDB?authSource=admin
+
+  patientservice:
+    build: ./patientservice
+    ports:
+      - "4002:4002"
+    depends_on:
+      - consul
+      - kafka
+      - mongo
+    environment:
+      - SERVICE_NAME=patientservice
+      - CONSUL_HOST=consul
+      - MONGO_URL=mongodb://root:example@mongo:27017/patientDB?authSource=admin
+
+  apigateway:
+    build: ./apigateaway
+    ports:
+      - "5000:5000"
+    depends_on:
+      - consul
+      - appointmentservice
+      - doctorservice
+      - patientservice
+    environment:
+      - CONSUL_HOST=consul
+  topic-init:
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      - kafka
+    entrypoint: [ "bash", "-c", "/create-topics.sh" ]
+    restart: on-failure
+    volumes:
+      - ./create-topics.sh:/create-topics.sh
+    
+

@@ -8,8 +8,10 @@ const PORT = 5000;
 const DOCTOR_SERVICE = 'doctorService';
 const PATIENT_SERVICE = 'patientService';
 const APPOINTMENT_SERVICE = 'appointmentService';
+const CONSUL_HOST = process.env.CONSUL_HOST || 'consul';
 
-const consul = new Consul();
+
+const consul = new Consul({host: CONSUL_HOST});
 
 app.use(express.json());
 
@@ -158,6 +160,7 @@ app.get('/appointments', async (req, res) => {
   
   app.post('/doctors', async (req, res) => {
     try {
+      console.log("I'm here");
       const SERVICE_URL = await getServiceURL(DOCTOR_SERVICE);
       const response = await axios.post(`${SERVICE_URL}/doctors`, req.body);
       res.status(response.status).json(response.data);

@@ -5,8 +5,6 @@ const db = require('mongoose');
 const Consul = require('consul');
 
 
-const app = express();
-const consul = new Consul();
 const {getPatients, getPatient, createPatient, updatePatient, deletePatient} = require('./Controllers/patientController');
 const startConsumer = require('./kafka/consumer');
 
@@ -14,11 +12,16 @@ const startConsumer = require('./kafka/consumer');
 startConsumer();
 
 
+const CONSUL_HOST = process.env.CONSUL_HOST || 'consul';
+const CONSUL_PORT = 8500;
 
+
+const app = express();
+const consul = new Consul({ host: CONSUL_HOST, port: CONSUL_PORT });
 
 
 const PORT = 4002;
-const DB_URL = 'mongodb://localhost:27017/patientDB';
+const DB_URL = 'mongodb://root:example@mongo:27017/patientDB?authSource=admin';
 const PATIENT_SERVICE = 'patientService';
 
 
@@ -39,10 +42,10 @@ app.use(bodyParser.urlencoded({ extended: true }));
 consul.agent.service.register(
     {
         name: PATIENT_SERVICE,
-        address: 'localhost',
+        address: 'patientservice',
         port: PORT,
         check: {
-            http: `http://localhost:${PORT}/health`,
+            http: `http://patientservice:${PORT}/health`,
             interval: '10s',
         },
     },

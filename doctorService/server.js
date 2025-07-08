@@ -13,12 +13,16 @@ const startConsumer = require('./kafka/consumer');
 startConsumer();
 
 
+const CONSUL_HOST = process.env.CONSUL_HOST || 'consul';
+const CONSUL_PORT = 8500;
+
+
 const app = express();
-const consul = new Consul();
+const consul = new Consul({ host: CONSUL_HOST, port: CONSUL_PORT });
 
 
 const PORT = 4000;
-const DB_URL = 'mongodb://localhost:27017/patientDB';
+const DB_URL = 'mongodb://root:example@mongo:27017/doctorDB?authSource=admin';
 const DOCTOR_SERVICE = 'doctorService';
 
 
@@ -36,10 +40,10 @@ app.use(bodyParser.urlencoded({ extended: true }));
 consul.agent.service.register(
     {
         name: DOCTOR_SERVICE,
-        address: 'localhost',
+        address: 'doctorservice',
         port: PORT,
         check: {
-            http: `http://localhost:${PORT}/health`,
+            http: `http://doctorservice:${PORT}/health`,
             interval: '10s',
         },
     },

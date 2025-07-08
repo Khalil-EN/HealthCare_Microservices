@@ -1,13 +1,7 @@
 const { producer, consumer, consumer2 } = require('./kafkaClient');
 const { v4: uuidv4 } = require('uuid');
 
-const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
-let isConsumerRunning = false;
-let isConsumer2Running = false;
-
-
-const pendingDoctorRequests = new Map(); // requestId -> resolve function
+const pendingDoctorRequests = new Map(); 
 
 // Start the consumer ONCE
 const startDoctorConsumer = async () => {
@@ -29,7 +23,6 @@ const startDoctorConsumer = async () => {
   });
 };
 
-// This gets called every time you validate a doctor
 const validateDoctor = async (doctorId) => {
   const requestId = uuidv4();
 
@@ -58,7 +51,7 @@ const validateDoctor = async (doctorId) => {
   });
 };
 
-const pendingPatientRequests = new Map(); // requestId -> resolve function
+const pendingPatientRequests = new Map(); 
 
 let isPatientConsumerStarted = false;
 
