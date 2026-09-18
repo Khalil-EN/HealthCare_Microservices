@@ -274,6 +274,8 @@ docker compose version
 
 ## Running the Application
 
+### Option 1 — Using Docker Compose
+
 Clone the repository:
 
 ```powershell
@@ -281,7 +283,7 @@ git clone <repository-url>
 cd HealthCare_Microservices
 ```
 
-Start the complete application with Docker Compose:
+Start the complete application:
 
 ```powershell
 docker compose up --build
@@ -293,7 +295,7 @@ Or run it in detached mode:
 docker compose up --build -d
 ```
 
-Docker Compose starts:
+Docker Compose starts the complete environment, including:
 
 * React frontend
 * API Gateway
@@ -306,7 +308,61 @@ Docker Compose starts:
 * Consul
 * Kafka topic initialization
 
-The individual services wait for MongoDB before starting their application servers.
+### Option 2 — Using the PowerShell Script
+
+The project also provides a PowerShell script to simplify the application lifecycle:
+
+```powershell
+.\run-with-cleanup.ps1
+```
+
+The script can be used to automate the Docker Compose startup and cleanup process.
+
+If PowerShell prevents the script from running because of the execution policy, you can allow scripts for the current PowerShell session with:
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+```
+
+Then run:
+
+```powershell
+.\run-with-cleanup.ps1
+```
+
+The script is intended to provide a convenient alternative to manually running the Docker Compose commands.
+
+### Stopping the Application
+
+If the application was started directly with Docker Compose:
+
+```powershell
+docker compose down
+```
+
+To also remove the associated volumes:
+
+```powershell
+docker compose down -v
+```
+
+You can inspect the running containers with:
+
+```powershell
+docker compose ps
+```
+
+And view logs with:
+
+```powershell
+docker compose logs
+```
+
+For a specific service:
+
+```powershell
+docker compose logs patientservice
+```
 
 ---
 
@@ -402,39 +458,6 @@ This allows the complete distributed application to be launched using a single D
 
 ---
 
-## Stopping the Application
-
-Stop the running containers:
-
-```powershell
-docker compose down
-```
-
-To also remove the MongoDB data volume, if one has been created:
-
-```powershell
-docker compose down -v
-```
-
-To inspect running containers:
-
-```powershell
-docker compose ps
-```
-
-To view logs:
-
-```powershell
-docker compose logs
-```
-
-Or for a specific service:
-
-```powershell
-docker compose logs patientservice
-```
-
----
 
 ## Development
 
